@@ -1,0 +1,35 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Calculate number of packs that needed to be shipped.",
+        "title": "Gymshark Shipment Calculator API",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:3000",
+    "basePath": "/",
+    "paths": {
+        "/calculate/{itemCount}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Calculate item packs",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Item Count",
+                        "name": "itemCount",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    }
+}

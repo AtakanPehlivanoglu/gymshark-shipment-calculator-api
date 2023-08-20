@@ -1,0 +1,7 @@
+app:
+  name: gymshark-shipment-calculator-api
+  environment: staging
+  pack_sizes: [250, 500, 1000, 2000, 5000]
+  timeout: 2000 #ms
+
+
