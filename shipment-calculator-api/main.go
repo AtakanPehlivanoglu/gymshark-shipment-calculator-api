@@ -63,7 +63,7 @@ func main() {
 
 	// swagger
 	r.Get("/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL("http://localhost:3000/swagger/doc.json")), //The url pointing to API definition
+		httpSwagger.URL(":3000/swagger/doc.json")), //The url pointing to API definition
 	)
 
 	logger.Fatal(http.ListenAndServe(":3000", r))
