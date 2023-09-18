@@ -2,9 +2,9 @@
 Coding challenge for solving items packing problem.
  
 ## Swagger UI
-[~~Swagger~~](https://urguj6dx2n.eu-central-1.awsapprunner.com/swagger/index.html#/default/get_calculate__itemCount_)
+[Swagger](https://urguj6dx2n.eu-central-1.awsapprunner.com/swagger/index.html#/default/get_calculate__itemCount_)
 
-Currently in disabled status, it could be activated on AWS App Runner anytime. 
+~~Currently in disabled status, it could be activated on AWS App Runner anytime.~~ 
 
 ## Run Locally
 ### Option 1
