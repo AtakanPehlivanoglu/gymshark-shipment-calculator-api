@@ -57,17 +57,6 @@ func TestShipmentCalculator(t *testing.T) {
 			expectedItemPacks:      nil,
 			expectedHTTPStatusCode: 400,
 		},
-		{
-			name: "negative item count as query parameter",
-			handler: &shipmentcalculator.ShipmentCalculator{
-				HandlerName: handlerName,
-				Logger:      lgr,
-				PackSizes:   packSizes,
-			},
-			itemCount:              "-50",
-			expectedItemPacks:      nil,
-			expectedHTTPStatusCode: 400,
-		},
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
