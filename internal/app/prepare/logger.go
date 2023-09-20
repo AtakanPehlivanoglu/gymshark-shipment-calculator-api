@@ -3,7 +3,8 @@ package prepare
 import "go.uber.org/zap"
 
 func ZapLogger() *zap.SugaredLogger {
-	logger := zap.NewExample().Sugar()
+	zapLogger, _ := zap.NewProduction()
+	logger := zapLogger.Sugar()
 
 	defer func(sugar *zap.SugaredLogger) {
 		_ = sugar.Sync()

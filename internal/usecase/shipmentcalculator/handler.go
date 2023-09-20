@@ -29,15 +29,29 @@ func (h *ShipmentCalculator) Handle(ctx context.Context, itemCount int) (map[int
 	smallestPackSize := packSizes[len(packSizes)-1]
 	biggestPackSize := packSizes[0]
 
-	var i, totalItems int
 	neededPacksMap := make(map[int]int)
 
-	// Calculate totalItems starting with smallest and biggest cases
+	// return if smaller than smallest
+	if itemCount < smallestPackSize {
+		neededPacksMap[smallestPackSize] += 1
+		return neededPacksMap, nil
+	}
+
+	totalItems := h.calculateTotalItems(itemCount, smallestPackSize, biggestPackSize)
+
+	h.calculatePackSizes(neededPacksMap, totalItems)
+
+	return neededPacksMap, nil
+}
+
+// calculateTotalItems finds total number of items needed with respect to 'packSizes' for given 'itemCount'.
+func (h *ShipmentCalculator) calculateTotalItems(itemCount, smallestPackSize, biggestPackSize int) int {
+	var i, totalItems int
+	packSizes := h.PackSizes
+
+	// Calculate totalItems starting with the biggest case
 	for {
-		if itemCount < smallestPackSize { // Smaller than smallest
-			neededPacksMap[smallestPackSize] += 1
-			return neededPacksMap, nil
-		} else if itemCount > biggestPackSize { // Bigger than biggest
+		if itemCount > biggestPackSize {
 			packCount := itemCount / biggestPackSize
 			totalItems += packCount * biggestPackSize
 			itemCount = itemCount % biggestPackSize
@@ -59,9 +73,6 @@ func (h *ShipmentCalculator) Handle(ctx context.Context, itemCount int) (map[int
 			mod := itemCount % size
 			itemCount = mod
 		} else if itemCount < smallestPackSize { // itemCount smaller than smallest
-			if itemCount == 0 {
-				break
-			}
 			totalItems += smallestPackSize
 			break
 		}
@@ -71,7 +82,13 @@ func (h *ShipmentCalculator) Handle(ctx context.Context, itemCount int) (map[int
 		}
 	}
 
-	// Calculate the smallest pack sizes for totalItems
+	return totalItems
+}
+
+// calculatePackSizes calculates the smallest pack sizes possible for 'totalItems'.
+func (h *ShipmentCalculator) calculatePackSizes(neededPacksMap map[int]int, totalItems int) {
+	packSizes := h.PackSizes
+
 	for _, size := range packSizes {
 		if totalItems == size {
 			neededPacksMap[size] = 1
@@ -85,6 +102,4 @@ func (h *ShipmentCalculator) Handle(ctx context.Context, itemCount int) (map[int
 			totalItems = mod
 		}
 	}
-
-	return neededPacksMap, nil
 }
