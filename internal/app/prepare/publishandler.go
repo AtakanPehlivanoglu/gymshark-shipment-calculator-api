@@ -4,6 +4,7 @@ import (
 	"errors"
 	usecasehandler "github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/internal/usecase/shipmentcalculator"
 	"go.uber.org/zap"
+	"sort"
 )
 
 func NewShipmentCalculatorHandler(handlerName string, logger *zap.SugaredLogger, packSizes []int) (*usecasehandler.ShipmentCalculator, error) {
@@ -16,9 +17,15 @@ func NewShipmentCalculatorHandler(handlerName string, logger *zap.SugaredLogger,
 	if len(packSizes) <= 0 {
 		return nil, errors.New("pack sizes are missing")
 	}
+
+	descendingPackSizes := make([]int, len(packSizes))
+	copy(descendingPackSizes, packSizes)
+	sort.Sort(sort.Reverse(sort.IntSlice(descendingPackSizes)))
+
 	return &usecasehandler.ShipmentCalculator{
-		HandlerName: handlerName,
-		Logger:      logger,
-		PackSizes:   packSizes,
+		HandlerName:         handlerName,
+		Logger:              logger,
+		AscendingPackSizes:  packSizes,
+		DescendingPackSizes: descendingPackSizes,
 	}, nil
 }

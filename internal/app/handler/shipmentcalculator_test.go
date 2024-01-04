@@ -16,7 +16,8 @@ import (
 func TestShipmentCalculator(t *testing.T) {
 	handlerName := "shipmentCalculatorHandler_test"
 	lgr := zap.NewExample().Sugar()
-	packSizes := []int{250, 500, 1000, 2000, 5000}
+	ascendingPackSizes := []int{250, 500, 1000, 2000, 5000}
+	descendingPackSizes := []int{5000, 2000, 1000, 500, 250}
 	tt := []struct {
 		name                   string
 		handler                *shipmentcalculator.ShipmentCalculator
@@ -27,9 +28,10 @@ func TestShipmentCalculator(t *testing.T) {
 		{
 			name: "happy path",
 			handler: &shipmentcalculator.ShipmentCalculator{
-				HandlerName: handlerName,
-				Logger:      lgr,
-				PackSizes:   packSizes,
+				HandlerName:         handlerName,
+				Logger:              lgr,
+				AscendingPackSizes:  ascendingPackSizes,
+				DescendingPackSizes: descendingPackSizes,
 			},
 			itemCount:              "501",
 			expectedItemPacks:      map[int]int{250: 1, 500: 1},
@@ -38,9 +40,10 @@ func TestShipmentCalculator(t *testing.T) {
 		{
 			name: "non integer item count as query parameter",
 			handler: &shipmentcalculator.ShipmentCalculator{
-				HandlerName: handlerName,
-				Logger:      lgr,
-				PackSizes:   packSizes,
+				HandlerName:         handlerName,
+				Logger:              lgr,
+				AscendingPackSizes:  ascendingPackSizes,
+				DescendingPackSizes: descendingPackSizes,
 			},
 			itemCount:              "non-integer",
 			expectedItemPacks:      nil,
@@ -49,9 +52,10 @@ func TestShipmentCalculator(t *testing.T) {
 		{
 			name: "negative item count as query parameter",
 			handler: &shipmentcalculator.ShipmentCalculator{
-				HandlerName: handlerName,
-				Logger:      lgr,
-				PackSizes:   packSizes,
+				HandlerName:         handlerName,
+				Logger:              lgr,
+				AscendingPackSizes:  ascendingPackSizes,
+				DescendingPackSizes: descendingPackSizes,
 			},
 			itemCount:              "-50",
 			expectedItemPacks:      nil,

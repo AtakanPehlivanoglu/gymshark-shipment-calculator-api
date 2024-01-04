@@ -4,6 +4,7 @@ import (
 	usecasehandler "github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/internal/usecase/shipmentcalculator"
 	"go.uber.org/zap"
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -11,6 +12,10 @@ func TestNewShipmentCalculatorHandler(t *testing.T) {
 	handlerName := "shipmentCalculatorHandler"
 	lgr := zap.NewExample().Sugar()
 	packSizes := []int{250, 500, 1000, 2000, 5000}
+	descendingPackSizes := make([]int, len(packSizes))
+	copy(descendingPackSizes, packSizes)
+	sort.Sort(sort.Reverse(sort.IntSlice(descendingPackSizes)))
+
 	tt := []struct {
 		name            string
 		handlerName     string
@@ -25,9 +30,10 @@ func TestNewShipmentCalculatorHandler(t *testing.T) {
 			logger:      lgr,
 			packSizes:   packSizes,
 			expectedHandler: &usecasehandler.ShipmentCalculator{
-				HandlerName: handlerName,
-				Logger:      lgr,
-				PackSizes:   packSizes,
+				HandlerName:         handlerName,
+				Logger:              lgr,
+				AscendingPackSizes:  packSizes,
+				DescendingPackSizes: descendingPackSizes,
 			},
 			expectedError: false,
 		},
