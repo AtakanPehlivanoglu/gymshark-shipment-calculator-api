@@ -34,6 +34,7 @@ func TestNewShipmentCalculatorHandler(t *testing.T) {
 				Logger:              lgr,
 				AscendingPackSizes:  packSizes,
 				DescendingPackSizes: descendingPackSizes,
+				LeastCommonMultiple: lcmSlice(packSizes),
 			},
 			expectedError: false,
 		},

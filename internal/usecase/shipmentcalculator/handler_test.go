@@ -20,35 +20,42 @@ func TestShipmentCalculator_Handle(t *testing.T) {
 			itemCount:           251,
 			ascendingPackSizes:  []int{250, 500, 1000, 2000, 5000},
 			descendingPackSizes: []int{5000, 2000, 1000, 500, 250},
-			expectedPackSizes:   map[int]int{500: 1},
+			expectedPackSizes:   map[int]int{250: 0, 500: 1, 1000: 0, 2000: 0, 5000: 0},
 		},
 		{
 			name:                "happy path - 2",
 			itemCount:           12001,
 			ascendingPackSizes:  []int{250, 500, 1000, 2000, 5000},
 			descendingPackSizes: []int{5000, 2000, 1000, 500, 250},
-			expectedPackSizes:   map[int]int{250: 1, 2000: 1, 5000: 2},
+			expectedPackSizes:   map[int]int{250: 1, 500: 0, 1000: 0, 2000: 1, 5000: 2},
 		},
 		{
 			name:                "happy path - different 'packSizes' configured",
 			itemCount:           13501,
 			ascendingPackSizes:  []int{500, 2500, 3000},
 			descendingPackSizes: []int{3000, 2500, 500},
-			expectedPackSizes:   map[int]int{500: 4, 3000: 4},
+			expectedPackSizes:   map[int]int{500: 0, 2500: 2, 3000: 3},
 		},
 		{
 			name:                "happy path - 'itemCount' smaller than smallest",
 			itemCount:           1,
 			ascendingPackSizes:  []int{500, 2500, 3000},
 			descendingPackSizes: []int{3000, 2500, 500},
-			expectedPackSizes:   map[int]int{500: 1},
+			expectedPackSizes:   map[int]int{500: 1, 2500: 0, 3000: 0},
 		},
 		{
 			name:                "happy path - 'itemCount' is in between consecutive sum of last 2 sizes and current size",
 			itemCount:           35,
 			ascendingPackSizes:  []int{15, 21, 32},
 			descendingPackSizes: []int{32, 21, 15},
-			expectedPackSizes:   map[int]int{15: 1, 21: 1},
+			expectedPackSizes:   map[int]int{15: 1, 21: 1, 32: 0},
+		},
+		{
+			name:                "happy path - 'itemCount' is too large",
+			itemCount:           500000,
+			ascendingPackSizes:  []int{23, 31, 53},
+			descendingPackSizes: []int{53, 31, 23},
+			expectedPackSizes:   map[int]int{23: 2, 31: 7, 53: 9429},
 		},
 	}
 	for _, tc := range tt {
@@ -59,6 +66,7 @@ func TestShipmentCalculator_Handle(t *testing.T) {
 				Logger:              lgr,
 				AscendingPackSizes:  tc.ascendingPackSizes,
 				DescendingPackSizes: tc.descendingPackSizes,
+				LeastCommonMultiple: lcmSlice(tc.ascendingPackSizes),
 			}
 
 			got, err := h.Handle(context.Background(), tc.itemCount)
@@ -73,50 +81,29 @@ func TestShipmentCalculator_Handle(t *testing.T) {
 	}
 }
 
-func TestShipmentCalculator_calculateTotalItems(t *testing.T) {
-	type args struct {
+// lcmSlice calculates the least common multiple for a slice of integers
+func lcmSlice(numbers []int) int {
+	if len(numbers) == 0 {
+		return 0
 	}
-	tt := []struct {
-		name               string
-		itemCount          int
-		smallestPackSize   int
-		biggestPackSize    int
-		expectedTotalItems int
-	}{
-		{
-			name:               "happy path",
-			itemCount:          251,
-			smallestPackSize:   250,
-			biggestPackSize:    5000,
-			expectedTotalItems: 500,
-		},
-		{
-			name:               "happy path - bigger than biggest",
-			itemCount:          5001,
-			smallestPackSize:   250,
-			biggestPackSize:    5000,
-			expectedTotalItems: 5250,
-		},
-		{
-			name:               "happy path - item count is multiple of biggest pack size",
-			itemCount:          500000,
-			smallestPackSize:   250,
-			biggestPackSize:    5000,
-			expectedTotalItems: 500000,
-		},
+
+	result := numbers[0]
+	for i := 1; i < len(numbers); i++ {
+		result = calculateLcm(result, numbers[i])
 	}
-	for _, tc := range tt {
-		t.Run(tc.name, func(t *testing.T) {
-			lgr := zap.NewExample().Sugar()
-			h := &ShipmentCalculator{
-				HandlerName:         "handler_test",
-				Logger:              lgr,
-				DescendingPackSizes: []int{250, 500, 1000, 2000, 5000},
-			}
-			got := h.calculateTotalItems(tc.itemCount, tc.smallestPackSize, tc.biggestPackSize)
-			if got != tc.expectedTotalItems {
-				t.Errorf("calculateTotalItems() = %v, want %v", got, tc.expectedTotalItems)
-			}
-		})
+
+	return result
+}
+
+// calculateLcm calculates the least common multiple using the GCD
+func calculateLcm(a, b int) int {
+	return a * b / calculateGcd(a, b)
+}
+
+// calculateGcd calculates the greatest common divisor using the Euclidean algorithm
+func calculateGcd(a, b int) int {
+	for b != 0 {
+		a, b = b, a%b
 	}
+	return a
 }

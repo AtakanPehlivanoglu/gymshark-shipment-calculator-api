@@ -3,6 +3,7 @@ package shipmentcalculator
 import (
 	"context"
 	"go.uber.org/zap"
+	"math"
 )
 
 type ShipmentCalculator struct {
@@ -10,6 +11,7 @@ type ShipmentCalculator struct {
 	Logger              *zap.SugaredLogger
 	AscendingPackSizes  []int
 	DescendingPackSizes []int
+	LeastCommonMultiple int
 }
 
 type Handler interface {
@@ -24,113 +26,107 @@ func (h *ShipmentCalculator) Handle(ctx context.Context, itemCount int) (map[int
 	}()
 
 	ascendingPackSizes := h.AscendingPackSizes
+	lcm := h.LeastCommonMultiple
 	neededPacksMap := make(map[int]int)
-	smallestPackSize := ascendingPackSizes[0]
 	biggestPackSize := ascendingPackSizes[len(ascendingPackSizes)-1]
+	nearestCombination := make([]int, len(ascendingPackSizes))
+	smallestDifference := math.MaxInt64
+	currentCombination := make([]int, len(ascendingPackSizes))
 
-	// return if (size(n-1) + size(n-2)) <= itemCount < size(n) special case satisfies.
-	for i := range ascendingPackSizes {
-		if i >= 2 && itemCount <= (ascendingPackSizes[i-1]+ascendingPackSizes[i-2]) && itemCount > ascendingPackSizes[i] {
-			consecutiveSum := ascendingPackSizes[i-1] + ascendingPackSizes[i-2]
-			// first check the distance of item count to consecutive sum and current pack size + n.th size
-			if isConsecutiveSumBigger(consecutiveSum, ascendingPackSizes[i], itemCount, ascendingPackSizes) {
-				break
-			}
-			neededPacksMap[ascendingPackSizes[i-1]] = 1
-			neededPacksMap[ascendingPackSizes[i-2]] = 1
-			return neededPacksMap, nil
+	// update the target for larger values than the lcm for efficiency
+	if lcm > biggestPackSize && itemCount > lcm {
+		division := lcm / biggestPackSize
+		mod := itemCount % lcm
+		multiplier := (itemCount - mod) / lcm
+		itemCount = mod
+		multiplier = multiplier * division
+		neededPacksMap[biggestPackSize] = multiplier
+	}
+
+	iterationRange := fixIterationRange(ascendingPackSizes, itemCount)
+	h.findCombinationRecursively(itemCount, 0, iterationRange, &currentCombination, &nearestCombination, &smallestDifference)
+	// update the neededPacksMap using the nearestCombination slice after recursion is done
+	for i, size := range ascendingPackSizes {
+		if size == biggestPackSize {
+			neededPacksMap[biggestPackSize] += nearestCombination[len(nearestCombination)-1]
+			break
 		}
+		neededPacksMap[size] = nearestCombination[i]
 	}
-	// return if smaller than smallest
-	if itemCount < smallestPackSize {
-		neededPacksMap[smallestPackSize] += 1
-		return neededPacksMap, nil
-	}
-
-	totalItems := h.calculateTotalItems(itemCount, smallestPackSize, biggestPackSize)
-
-	h.calculatePackSizes(neededPacksMap, totalItems)
 
 	return neededPacksMap, nil
 }
 
-// calculateTotalItems finds total number of items needed with respect to 'packSizes' for given 'itemCount'.
-func (h *ShipmentCalculator) calculateTotalItems(itemCount, smallestPackSize, biggestPackSize int) int {
-	var i, totalItems int
-	descendingPackSizes := h.DescendingPackSizes
+func (h *ShipmentCalculator) findCombinationRecursively(itemCount int, index, iterationRange int, currentCombination, nearestCombination *[]int, smallestDifference *int) {
+	ascendingPackSizes := h.AscendingPackSizes
+	if index == len(ascendingPackSizes) {
+		// calculate the sum and difference
+		currentSum := calculateSum(*currentCombination, ascendingPackSizes)
+		difference := abs(currentSum - itemCount)
 
-	// Calculate totalItems starting with the biggest case
-	for {
-		if itemCount > biggestPackSize {
-			packCount := itemCount / biggestPackSize
-			totalItems += packCount * biggestPackSize
-			itemCount = itemCount % biggestPackSize
-			break
-		} else {
-			break
+		// update the nearest combination if needed
+		if difference < *smallestDifference && itemCount <= currentSum {
+			*smallestDifference = difference
+			copy(*nearestCombination, *currentCombination)
+
 		}
-	}
+		// update the nearest combination with the least packages possible
+		if currentSum == calculateSum(*nearestCombination, ascendingPackSizes) {
+			nearestCombinationPackSize := findTotalPackSize(*nearestCombination)
+			currentCombinationPackSize := findTotalPackSize(*currentCombination)
 
-	// Return totalItems in case of itemCount is multiple of biggest pack size.
-	if itemCount == 0 {
-		return totalItems
-	}
-
-	// Finalize totalItems calculation for rest of the scenarios
-	for {
-		size := descendingPackSizes[i]
-		if itemCount == size { // equal sizes
-			totalItems += size
-			break
-		} else if itemCount > size { // itemCount bigger than size
-			count := itemCount / size
-			totalItems += count * size
-			mod := itemCount % size
-			itemCount = mod
-		} else if itemCount < smallestPackSize { // itemCount smaller than smallest
-			totalItems += smallestPackSize
-			break
-		}
-
-		if i < len(descendingPackSizes)-1 {
-			i++
-		}
-	}
-
-	return totalItems
-}
-
-// calculatePackSizes calculates the smallest pack sizes possible for 'totalItems'.
-func (h *ShipmentCalculator) calculatePackSizes(neededPacksMap map[int]int, totalItems int) {
-	descendingPackSizes := h.DescendingPackSizes
-
-	for _, size := range descendingPackSizes {
-		if totalItems == size {
-			neededPacksMap[size] = 1
-			break
-		}
-		if totalItems > size {
-			count := totalItems / size
-			mod := totalItems % size
-
-			neededPacksMap[size] = count
-			totalItems = mod
-		}
-	}
-}
-
-func isConsecutiveSumBigger(consecutiveSum, currentPackSize, itemCount int, packSizes []int) bool {
-	for _, size := range packSizes {
-		if currentPackSize+size < consecutiveSum && itemCount <= currentPackSize+size {
-			diff1 := currentPackSize + size - itemCount
-			diff2 := consecutiveSum - itemCount
-
-			if diff1 > diff2 {
-				return false
-			} else {
-				return true
+			if currentCombinationPackSize < nearestCombinationPackSize {
+				copy(*nearestCombination, *currentCombination)
 			}
 		}
+		return
 	}
-	return false
+
+	// recursive call for the current index
+	for i := 0; i <= iterationRange/ascendingPackSizes[index]; i++ {
+		(*currentCombination)[index] = i
+		h.findCombinationRecursively(itemCount, index+1, iterationRange, currentCombination, nearestCombination, smallestDifference)
+	}
+}
+
+// fixIterationRange updates iteration range for special cases to have all combinations properly
+func fixIterationRange(numbers []int, target int) int {
+	iterationRange := 0
+	for i, number := range numbers {
+		// target is smaller than the smallest size
+		if i == 0 && target < number {
+			iterationRange = numbers[i]
+			return iterationRange
+		}
+		// round to nearest bigger size for in between case
+		if target < numbers[i] && target > numbers[i-1] {
+			iterationRange = numbers[i]
+			return iterationRange
+		}
+	}
+	return target
+}
+
+// abs function for calculating absolute value
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+func calculateSum(combination []int, numbers []int) int {
+	sum := 0
+	for i := range combination {
+		sum += combination[i] * numbers[i]
+	}
+	return sum
+}
+
+func findTotalPackSize(packs []int) int {
+	sum := 0
+	for _, pack := range packs {
+		sum += pack
+	}
+	return sum
 }

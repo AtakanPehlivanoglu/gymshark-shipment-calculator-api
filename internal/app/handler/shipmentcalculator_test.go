@@ -32,9 +32,10 @@ func TestShipmentCalculator(t *testing.T) {
 				Logger:              lgr,
 				AscendingPackSizes:  ascendingPackSizes,
 				DescendingPackSizes: descendingPackSizes,
+				LeastCommonMultiple: 10000,
 			},
 			itemCount:              "501",
-			expectedItemPacks:      map[int]int{250: 1, 500: 1},
+			expectedItemPacks:      map[int]int{250: 1, 500: 1, 1000: 0, 2000: 0, 5000: 0},
 			expectedHTTPStatusCode: 200,
 		},
 		{
