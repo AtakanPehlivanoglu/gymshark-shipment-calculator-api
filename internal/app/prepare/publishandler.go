@@ -3,11 +3,11 @@ package prepare
 import (
 	"errors"
 	usecasehandler "github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/internal/usecase/shipmentcalculator"
-	"go.uber.org/zap"
+	"log"
 	"sort"
 )
 
-func NewShipmentCalculatorHandler(handlerName string, logger *zap.SugaredLogger, packSizes []int) (*usecasehandler.ShipmentCalculator, error) {
+func NewShipmentCalculatorHandler(handlerName string, logger *log.Logger, packSizes []int) (*usecasehandler.ShipmentCalculator, error) {
 	if handlerName == "" {
 		return nil, errors.New("handler name is missing")
 	}

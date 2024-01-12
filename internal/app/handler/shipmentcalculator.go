@@ -1,11 +1,11 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/internal/app/response"
 	"github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/internal/usecase/shipmentcalculator"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
 	"net/http"
 	"strconv"
 )
@@ -20,28 +20,36 @@ func ShipmentCalculator(handler shipmentcalculator.Handler) func(w http.Response
 		itemCount, err := strconv.Atoi(itemCountStr)
 
 		if err != nil {
-			render.Render(w, r, response.ErrInvalidRequest(err))
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write(response.ErrInvalidRequest(err))
 			return
 		}
 
 		if itemCount <= 0 {
 			err = fmt.Errorf("item count should be greater than 0")
-			render.Render(w, r, response.ErrInvalidRequest(err))
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write(response.ErrInvalidRequest(err))
 			return
 		}
 
 		packCount, err := handler.Handle(ctx, itemCount)
 
 		if err != nil {
-			render.Render(w, r, response.ErrInternalServer(err))
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(response.ErrInternalServer(err))
 			return
 		}
 
 		shipmentCalculatorResponse := response.NewShipmentCalculatorResponse(http.StatusOK, "Number of Item Packs", packCount)
 
-		err = render.Render(w, r, shipmentCalculatorResponse)
+		jsonResponse, err := json.Marshal(shipmentCalculatorResponse)
 		if err != nil {
-			render.Render(w, r, response.ErrInternalServer(err))
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(response.ErrInternalServer(err))
+			return
 		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonResponse)
 	}
 }

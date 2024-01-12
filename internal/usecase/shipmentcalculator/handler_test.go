@@ -1,8 +1,9 @@
 package shipmentcalculator
 
 import (
+	"bytes"
 	"context"
-	"go.uber.org/zap"
+	"log"
 	"reflect"
 	"testing"
 )
@@ -60,7 +61,8 @@ func TestShipmentCalculator_Handle(t *testing.T) {
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			lgr := zap.NewExample().Sugar()
+			var buff bytes.Buffer
+			lgr := log.New(&buff, "", log.LstdFlags)
 			h := &ShipmentCalculator{
 				HandlerName:         "handler_test",
 				Logger:              lgr,

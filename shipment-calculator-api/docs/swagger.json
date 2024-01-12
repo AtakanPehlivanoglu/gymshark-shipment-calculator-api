@@ -10,7 +10,7 @@
         },
         "version": "1.0"
     },
-    "host": "urguj6dx2n.eu-central-1.awsapprunner.com",
+    "host": "localhost:3000",
     "basePath": "/",
     "paths": {
         "/calculate/{itemCount}": {

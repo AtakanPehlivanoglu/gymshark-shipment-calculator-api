@@ -2,13 +2,13 @@ package shipmentcalculator
 
 import (
 	"context"
-	"go.uber.org/zap"
+	"log"
 	"math"
 )
 
 type ShipmentCalculator struct {
 	HandlerName         string
-	Logger              *zap.SugaredLogger
+	Logger              *log.Logger
 	AscendingPackSizes  []int
 	DescendingPackSizes []int
 	LeastCommonMultiple int
@@ -19,10 +19,10 @@ type Handler interface {
 }
 
 func (h *ShipmentCalculator) Handle(ctx context.Context, itemCount int) (map[int]int, error) {
-	h.Logger.Infof("%v started for item count %v ", h.HandlerName, itemCount)
+	h.Logger.Printf("%v started for item count %v ", h.HandlerName, itemCount)
 	initialItemCount := itemCount
 	defer func() {
-		h.Logger.Infof("%v finished for item count %v ", h.HandlerName, initialItemCount)
+		h.Logger.Printf("%v finished for item count %v ", h.HandlerName, initialItemCount)
 	}()
 
 	ascendingPackSizes := h.AscendingPackSizes

@@ -1,8 +1,9 @@
 package prepare
 
 import (
+	"bytes"
 	usecasehandler "github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/internal/usecase/shipmentcalculator"
-	"go.uber.org/zap"
+	"log"
 	"reflect"
 	"sort"
 	"testing"
@@ -10,7 +11,8 @@ import (
 
 func TestNewShipmentCalculatorHandler(t *testing.T) {
 	handlerName := "shipmentCalculatorHandler"
-	lgr := zap.NewExample().Sugar()
+	var buff bytes.Buffer
+	lgr := log.New(&buff, "", log.LstdFlags)
 	packSizes := []int{250, 500, 1000, 2000, 5000}
 	descendingPackSizes := make([]int, len(packSizes))
 	copy(descendingPackSizes, packSizes)
@@ -19,7 +21,7 @@ func TestNewShipmentCalculatorHandler(t *testing.T) {
 	tt := []struct {
 		name            string
 		handlerName     string
-		logger          *zap.SugaredLogger
+		logger          *log.Logger
 		packSizes       []int
 		expectedHandler *usecasehandler.ShipmentCalculator
 		expectedError   bool

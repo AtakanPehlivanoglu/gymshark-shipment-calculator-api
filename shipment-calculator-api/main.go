@@ -9,8 +9,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
+	"log"
 	"net/http"
-	"time"
 )
 
 //	@title			Gymshark Shipment Calculator API
@@ -21,7 +21,7 @@ import (
 //	@contact.url	http://www.swagger.io/support
 //	@contact.email	support@swagger.io
 
-//	@host		urguj6dx2n.eu-central-1.awsapprunner.com
+//	@host		localhost:3000
 //	@BasePath	/
 
 // Calculate godoc
@@ -31,12 +31,12 @@ import (
 //	@Param		itemCount	path	int	true	"Item Count"
 //	@Router		/calculate/{itemCount} [get]
 func main() {
-	logger := prepare.ZapLogger()
-
 	appConfig, err := config.GetConfig()
 	if err != nil {
-		logger.Fatalf("error on GetConfig, %v", err)
+		log.Fatalf("error on GetConfig, %v", err)
 	}
+
+	logger := prepare.AppLogger(appConfig)
 
 	// init chi router
 	r := chi.NewRouter()
@@ -45,7 +45,6 @@ func main() {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(time.Millisecond * time.Duration(appConfig.App.Timeout)))
 
 	// business handlers
 	handler, err := prepare.NewShipmentCalculatorHandler("shipmentCalculatorHandler", logger, appConfig.App.PackSizes)

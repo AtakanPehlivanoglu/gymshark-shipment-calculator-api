@@ -1,14 +1,14 @@
 package prepare
 
-import "go.uber.org/zap"
+import (
+	"fmt"
+	"github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/internal/app/config"
+	"log"
+	"os"
+)
 
-func ZapLogger() *zap.SugaredLogger {
-	zapLogger, _ := zap.NewProduction()
-	logger := zapLogger.Sugar()
-
-	defer func(sugar *zap.SugaredLogger) {
-		_ = sugar.Sync()
-	}(logger)
+func AppLogger(config *config.Config) *log.Logger {
+	logger := log.New(os.Stdout, fmt.Sprintf("["+config.App.Name+"] "), log.Ldate|log.Ltime)
 
 	return logger
 }

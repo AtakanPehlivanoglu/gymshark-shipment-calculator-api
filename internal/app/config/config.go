@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 	"os"
 )
@@ -43,12 +42,6 @@ func GetConfig() (*Config, error) {
 	err = viper.Unmarshal(config)
 	if err != nil {
 		return nil, fmt.Errorf("unable to decode into config struct, %v", err)
-	}
-
-	validate := validator.New()
-	err = validate.Struct(config)
-	if err != nil {
-		return nil, fmt.Errorf("missing required attributes, %v", err)
 	}
 
 	return config, nil

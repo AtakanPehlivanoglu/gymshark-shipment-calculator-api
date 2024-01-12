@@ -1,13 +1,14 @@
 package handler
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	handlerresponse "github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/internal/app/response"
 	"github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/internal/usecase/shipmentcalculator"
 	"github.com/go-chi/chi/v5"
-	"go.uber.org/zap"
 	"io"
+	"log"
 	"net/http/httptest"
 	"reflect"
 	"testing"
@@ -15,7 +16,8 @@ import (
 
 func TestShipmentCalculator(t *testing.T) {
 	handlerName := "shipmentCalculatorHandler_test"
-	lgr := zap.NewExample().Sugar()
+	var buff bytes.Buffer
+	lgr := log.New(&buff, "", log.LstdFlags)
 	ascendingPackSizes := []int{250, 500, 1000, 2000, 5000}
 	descendingPackSizes := []int{5000, 2000, 1000, 500, 250}
 	tt := []struct {
