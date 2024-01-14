@@ -1,11 +1,14 @@
 name: GitHub Actions ECR Push
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
+
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
     steps:
-    - run: docker build --tag gymshark-shipment-calculator-api:v1 .
+    - name: Build Docker image
+      run: docker build --platform=linux/amd64 -t gymshark-shipment-calculator-api:v1 .
+
     - name: Push to ECR
       id: ecr
       uses: jwalton/gh-ecr-push@v1
