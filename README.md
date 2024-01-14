@@ -1,7 +1,7 @@
 # gymshark-shipment-calculator-api
 Coding challenge for solving items packing problem.
 
-#Deployments
+# Deployments
 Pushing a new commit will trigger [Push Docker Image to ECR Github Action Workflow](https://github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/actions/workflows/main.yml) which will update private ECR repository with the latest Docker image. 
 
 Automatic Deployments are enabled on AWS AppRunner whenever new Docker image is pushed to ECR repositry. 
