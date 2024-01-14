@@ -6,6 +6,9 @@ jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
     steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+      
     - name: Build Docker image
       run: docker build --platform=linux/amd64 -t gymshark-shipment-calculator-api:v1 .
 
