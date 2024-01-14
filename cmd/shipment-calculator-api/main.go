@@ -21,7 +21,7 @@ import (
 //	@contact.url	http://www.swagger.io/support
 //	@contact.email	support@swagger.io
 
-//	@host		urguj6dx2n.eu-central-1.awsapprunner.com
+//	@host		exz4e5um5a.eu-central-1.awsapprunner.com
 //	@BasePath	/
 
 // Calculate godoc

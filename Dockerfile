@@ -16,7 +16,6 @@ FROM alpine:3.7
 ENV SPEC_FILE_PATH=config
 
 WORKDIR /
-COPY --from=builder /app/shipment-calculator-api .
 COPY --from=builder /app .
 
 CMD ["/shipment-calculator-api"]
