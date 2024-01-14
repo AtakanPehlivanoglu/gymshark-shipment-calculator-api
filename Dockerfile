@@ -1,18 +1,22 @@
+#!/bin/sh
 # Builder
 
-FROM --platform=linux/amd64 golang:1.18-alpine as builder
+FROM golang:1.18-alpine as builder
 
 WORKDIR /app
 
 COPY . ./
 
-RUN go build ./cmd/shipment-calculator-api
+RUN CGO_ENABLED=0 GOOS=linux go build ./cmd/shipment-calculator-api
 
 # Final docker image
 
-FROM --platform=linux/amd64 alpine:3.7
+FROM alpine:3.7
+
+ENV SPEC_FILE_PATH=config
 
 WORKDIR /
-COPY --from=builder /app/bin/shipment-calculator-api .
+COPY --from=builder /app/shipment-calculator-api .
+COPY --from=builder /app .
 
 CMD ["/shipment-calculator-api"]
