@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	_ "github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/cmd/shipment-calculator-api/docs"
 	"github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/internal/app/config"
 	apphandler "github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/internal/app/handler"
 	"github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/internal/app/prepare"
-	_ "github.com/AtakanPehlivanoglu/gymshark-shipment-calculator-api/shipment-calculator-api/docs"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
