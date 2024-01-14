@@ -6,10 +6,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: docker build --tag gymshark-shipment-calculator-api:v1 .
-    - uses: jwalton/gh-ecr-push@v1
+    - name: Push to ECR
+      id: ecr
+      uses: jwalton/gh-ecr-push@v1
       with:
         access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         region: eu-central-1
         local-image: gymshark-shipment-calculator-api:v1
         image: gymshark-shipment-calculator-api:v1, gymshark-shipment-calculator-api:latest
+
