@@ -18,5 +18,11 @@ Automatic Deployments are enabled on AWS AppRunner whenever new Docker image is 
 ### Option 2
 Add `SPEC_FILE_PATH=config` ENV variable in anyway and run `main.go` file.
 
+### Option 3 - Docker Container 
+- Build the image
 
+`docker build -t gymshark-shipment-calculator-api:latest .`
 
+- Run the container
+
+`docker run -p 3000:3000 gymshark-shipment-calculator-api:latest`
